@@ -13,7 +13,7 @@
             [closh.zero.platform.process :as process]
             [closh.zero.builtin :as builtin]
             [closh.zero.env :as env]
-            [closh.zero.util :refer [thread-stop]]
+            [closh.zero.util :refer [thread-stop] :as util]
             [closh.zero.macros-fns :as macros-fns]
             [clojure.repl :as repl]
             [closh.zero.platform.clojure-compiler :as clojure-compiler]))
@@ -106,23 +106,27 @@
 
 (def bindings {'deref deref
                'clojure.core/deref deref
+               'slurp slurp
                'swap! swap!
                'clojure.core/swap! swap!
                'print print
                'println println
                'load-file load-file
                'Math/sqrt #(Math/sqrt %)
-               'java.lang.Thread/currentThread #(Thread/currentThread)
-               'thread-stop thread-stop
+               'thread-stop util/thread-stop
                'clojure.repl/set-break-handler! repl/set-break-handler!
-               'closh.zero.env/*closh-commands* env/*closh-commands*
+               '*closh-commands* env/*closh-commands*
                'cd builtin/cd
                'exit builtin/exit
                'quit builtin/quit
                'getenv builtin/getenv
                'setenv builtin/setenv
                'unsetenv builtin/unsetenv
-               '*args* (sci/new-dynamic-var '*args* (rest *command-line-args*))})
+               '*args* (sci/new-dynamic-var '*args* (rest *command-line-args*))
+               'source-shell util/source-shell
+               '*closh-aliases* env/*closh-aliases*
+               'expand closh-core/expand
+               'shx closh-core/shx})
 
 (def repl-requires {; 'source
                     ; (with-meta
@@ -157,7 +161,8 @@
                                              'pipe-multi pipeline/pipe-multi
                                              'process-output pipeline/process-output}
                        'closh.zero.platform.process {'exit-code process/exit-code
-                                                     'wait process/wait}
+                                                     'wait process/wait
+                                                     'cwd process/cwd}
                        'closh.zero.core {'expand-variable closh-core/expand-variable
                                          'expand-tilde closh-core/expand-tilde
                                          'expand-filename closh-core/expand-filename
@@ -170,7 +175,15 @@
                                          'expand-alias closh-core/expand-alias
                                          'expand-abbreviation closh-core/expand-abbreviation
                                          '*closh-version* closh-core/*closh-version*
-                                         'closh-version closh-core/closh-version}}
+                                         'closh-version closh-core/closh-version}
+                       'closh.zero.util {'thread-stop util/thread-stop
+                                         'source-shell util/source-shell}
+                       'closh.zero.env {'*closh-aliases* env/*closh-aliases*
+                                        '*closh-commands* env/*closh-commands*
+                                        '*closh-abbreviations* env/*closh-commands*}
+                       'closh.zero.macros-fns macro-bindings}
+          :classes {'java.util.UUID java.util.UUID
+                    'java.lang.Thread java.lang.Thread}
           :env sci-env})
 
 (defn sci-eval [form]
