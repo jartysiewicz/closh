@@ -34,7 +34,8 @@ $NATIVE_IMAGE \
   -H:+ReportExceptionStackTraces \
   -J-Dclojure.spec.skip-macros=true \
   -J-Dclojure.compiler.direct-linking=true \
-  "-H:IncludeResources=CLOSH_VERSION" \
+  -H:IncludeResources=CLOSH_VERSION \
+  -H:IncludeResources='org\.jline\.utils\..*' \
   -H:ReflectionConfigurationFiles=reflection.json \
   --initialize-at-run-time=java.lang.Math\$RandomNumberGeneratorHolder \
   --initialize-at-build-time \
